@@ -15,7 +15,7 @@ This project enables users to join chat rooms instantly using generated session 
 ---
 
 ## 🔗 **Live Demo**
-👉 **Live Link:** https://YOUR_LIVE_LINK_HERE  
+👉 **Live Link:** https://wetalk-s4rp.onrender.com/
 
 ---
 
