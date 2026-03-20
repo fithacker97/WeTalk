@@ -17,10 +17,25 @@
 		<div class="page-background" aria-hidden="true"></div>
 		<main class="app-shell">
 			<aside class="control-panel">
-				<div class="branding">
-					<h1>WeTalk</h1>
-					<p>Create or enter a token on this side, then chat on the right side.</p>
+				<div class="brand-row">
+					<div class="brand-mark">W</div>
+					<div class="branding">
+						<h1>WeTalk</h1>
+						<p>Token based private room chat</p>
+					</div>
+					<div id="panel-connection" class="panel-status">Offline</div>
 				</div>
+				<div class="control-metrics">
+					<div class="metric-card">
+						<span>Active Room</span>
+						<strong id="panel-token">-</strong>
+					</div>
+					<div class="metric-card">
+						<span>Users Online</span>
+						<strong id="panel-users">0</strong>
+					</div>
+				</div>
+
 				<form id="login-form">
 					<label for="token-input">Room Token</label>
 					<div class="token-controls">
@@ -51,28 +66,50 @@
 					</div>
 				</form>
 				<div id="toast"></div>
-				<p class="panel-note">Tip: click the generated token to copy it.</p>
+				<p class="panel-note">Tip: open share link on another device and join instantly.</p>
 			</aside>
 
 			<section id="chat" class="chat-panel">
-				<div id="chat-header">
-					<div id="token-used">Token: -</div>
-					<div id="user-count">Users online: 0</div>
-					<div id="connection-state">Not connected</div>
-				</div>
+				<header id="chat-header">
+					<div class="chat-tabs" role="tablist" aria-label="Conversation tabs">
+						<button type="button" class="chat-tab active" role="tab" aria-selected="true">
+							Conversation
+						</button>
+						<button type="button" class="chat-tab" role="tab" aria-selected="false" disabled>
+							Members
+						</button>
+					</div>
+					<div class="chat-top-row">
+						<div class="chat-room-profile">
+							<div class="room-avatar">#</div>
+							<div class="chat-heading">
+								<h2>Conversation</h2>
+								<p id="chat-subtitle">Join a room to start real-time messaging.</p>
+							</div>
+						</div>
+						<div class="chat-header-chips">
+							<div id="token-used">Token: -</div>
+							<div id="user-count">Users online: 0</div>
+							<div id="connection-state">Not connected</div>
+						</div>
+					</div>
+				</header>
 				<ul id="messages"></ul>
 				<div id="chat-overlay" class="chat-overlay">
 					Join a room from the left panel to start messaging.
 				</div>
 				<form id="form">
-					<input
-						type="text"
-						name="message"
-						id="input"
-						placeholder="Type a message"
-						autocomplete="off"
-						disabled
-					/>
+					<div class="composer-input-wrap">
+						<input
+							type="text"
+							name="message"
+							id="input"
+							placeholder="Type a message"
+							autocomplete="off"
+							disabled
+						/>
+						<small id="composer-hint">Press Enter to send quickly</small>
+					</div>
 					<button type="submit" id="send-button" disabled>Send</button>
 				</form>
 			</section>

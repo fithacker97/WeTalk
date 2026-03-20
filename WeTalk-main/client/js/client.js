@@ -7,6 +7,7 @@ const userColors = {};
 let toastTimer;
 const elements = {};
 const NO_TOKEN_TEXT = "No token generated yet";
+let lastMessageDayKey = "";
 
 async function copyTextToClipboard(textToCopy) {
 	try {
@@ -84,36 +85,57 @@ function syncTokenAndLinkUI(token) {
 	if (!cleanToken) {
 		elements.tokenDisplay.textContent = NO_TOKEN_TEXT;
 		elements.shareLink.value = "";
+		elements.panelToken.textContent = "-";
 		return;
 	}
 
 	elements.tokenDisplay.textContent = cleanToken;
 	elements.shareLink.value = buildShareLink(cleanToken);
+	elements.panelToken.textContent = cleanToken;
+}
+
+function updateUserCount(count = 0) {
+	const safeCount = Number.isFinite(count) ? count : 0;
+	elements.userCount.textContent = `Users online: ${safeCount}`;
+	elements.panelUsers.textContent = String(safeCount);
 }
 
 function setConnectionState(text, variant = "neutral") {
 	elements.connectionState.textContent = text;
+	elements.panelConnection.textContent = text;
 
 	if (variant === "success") {
 		elements.connectionState.style.background = "#d7f3eb";
 		elements.connectionState.style.color = "#0f6b61";
+		elements.panelConnection.style.background = "#dcfce7";
+		elements.panelConnection.style.color = "#166534";
+		elements.chatSubtitle.textContent = `Live in room ${currentToken || "-"}`;
 		return;
 	}
 
 	if (variant === "warn") {
 		elements.connectionState.style.background = "#fff4d4";
 		elements.connectionState.style.color = "#7c5f00";
+		elements.panelConnection.style.background = "#fef3c7";
+		elements.panelConnection.style.color = "#92400e";
+		elements.chatSubtitle.textContent = "Setting up your chat room...";
 		return;
 	}
 
 	if (variant === "error") {
 		elements.connectionState.style.background = "#ffe2e6";
 		elements.connectionState.style.color = "#9f1239";
+		elements.panelConnection.style.background = "#ffe4e6";
+		elements.panelConnection.style.color = "#9f1239";
+		elements.chatSubtitle.textContent = text;
 		return;
 	}
 
 	elements.connectionState.style.background = "#edf2f7";
 	elements.connectionState.style.color = "#102a43";
+	elements.panelConnection.style.background = "#eef2ff";
+	elements.panelConnection.style.color = "#4338ca";
+	elements.chatSubtitle.textContent = "Join a room to start real-time messaging.";
 }
 
 function setChatEnabled(enabled) {
@@ -122,31 +144,97 @@ function setChatEnabled(enabled) {
 	elements.chatOverlay.classList.toggle("hidden", enabled);
 }
 
+function formatDayKey(date) {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
+
+function dayLabelFromDate(date) {
+	const messageDay = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+	const now = new Date();
+	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+	const oneDay = 24 * 60 * 60 * 1000;
+
+	if (messageDay === today) {
+		return "Today";
+	}
+
+	if (messageDay === today - oneDay) {
+		return "Yesterday";
+	}
+
+	return date.toLocaleDateString(undefined, {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	});
+}
+
+function addDateSeparatorIfNeeded(date) {
+	const key = formatDayKey(date);
+	if (key === lastMessageDayKey) {
+		return;
+	}
+
+	lastMessageDayKey = key;
+	const separator = document.createElement("li");
+	separator.className = "date-separator";
+	separator.textContent = dayLabelFromDate(date);
+	elements.messages.appendChild(separator);
+}
+
 function appendMessage(msg, senderUsername, timestamp) {
 	const li = document.createElement("li");
-	li.textContent = msg;
+	li.className = "message-row";
 
-	const smallName = document.createElement("small");
-	smallName.textContent = senderUsername || "Unknown";
+	const avatar = document.createElement("div");
+	avatar.className = "message-avatar";
+	avatar.textContent = (senderUsername || "U").charAt(0).toUpperCase();
+
+	const bubble = document.createElement("div");
+	bubble.className = "message-bubble";
+
+	const messageText = document.createElement("p");
+	messageText.className = "message-text";
+	messageText.textContent = msg;
+
+	const meta = document.createElement("div");
+	meta.className = "message-meta";
+
+	const messageName = document.createElement("span");
+	messageName.className = "message-name";
+	messageName.textContent = senderUsername || "Unknown";
 
 	const messageDate = timestamp ? new Date(timestamp) : new Date();
-	const smallTimeDate = document.createElement("small");
-	smallTimeDate.textContent = Number.isNaN(messageDate.getTime())
-		? ""
-		: messageDate.toLocaleString();
+	const safeDate = Number.isNaN(messageDate.getTime()) ? new Date() : messageDate;
+	addDateSeparatorIfNeeded(safeDate);
+
+	const messageTime = document.createElement("span");
+	messageTime.className = "message-time";
+	messageTime.textContent = safeDate.toLocaleTimeString([], {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
 
 	const colors = getColorForUser(senderUsername || "Unknown");
-	li.style.backgroundColor = colors.background;
-	li.style.color = colors.text;
+	avatar.style.backgroundColor = colors.background;
+	avatar.style.color = colors.text;
 
-	li.appendChild(smallName);
-	if (smallTimeDate.textContent) {
-		li.appendChild(smallTimeDate);
+	meta.appendChild(messageName);
+	if (messageTime.textContent) {
+		meta.appendChild(messageTime);
 	}
 
 	if (senderUsername === currentUsername) {
 		li.classList.add("own-message");
 	}
+
+	bubble.appendChild(messageText);
+	bubble.appendChild(meta);
+	li.appendChild(avatar);
+	li.appendChild(bubble);
 
 	elements.messages.appendChild(li);
 	elements.messages.scrollTop = elements.messages.scrollHeight;
@@ -156,13 +244,17 @@ function clearConnectedState(clearMessages = false) {
 	currentToken = "";
 	currentUsername = "";
 	elements.tokenUsed.textContent = "Token: -";
-	elements.userCount.textContent = "Users online: 0";
+	updateUserCount(0);
 	setConnectionState("Not connected");
 	setChatEnabled(false);
 
 	if (clearMessages) {
 		elements.messages.innerHTML = "";
+		lastMessageDayKey = "";
 	}
+
+	const tokenFromInput = elements.tokenInput.value.trim();
+	elements.panelToken.textContent = tokenFromInput || "-";
 }
 
 function disconnectFromChat(clearStorage = false) {
@@ -194,6 +286,7 @@ function attachChatSocket(token, username) {
 		currentUsername = username;
 
 		elements.tokenUsed.textContent = `Token: ${currentToken}`;
+		elements.panelToken.textContent = currentToken;
 		setConnectionState(`Connected as ${currentUsername}`, "success");
 		setChatEnabled(true);
 		elements.input.focus();
@@ -210,7 +303,7 @@ function attachChatSocket(token, username) {
 
 	socket.on("disconnect", (reason) => {
 		setChatEnabled(false);
-		elements.userCount.textContent = "Users online: 0";
+		updateUserCount(0);
 
 		if (reason === "io client disconnect") {
 			setConnectionState("Not connected");
@@ -221,7 +314,7 @@ function attachChatSocket(token, username) {
 	});
 
 	socket.on("update-user-count", (count) => {
-		elements.userCount.textContent = `Users online: ${count}`;
+		updateUserCount(count);
 	});
 
 	socket.on("message", (msg, senderUsername, timestamp) => {
@@ -245,6 +338,7 @@ function connectToChat(token, username) {
 
 	syncTokenAndLinkUI(cleanToken);
 	elements.messages.innerHTML = "";
+	lastMessageDayKey = "";
 	attachChatSocket(cleanToken, cleanUsername);
 }
 
@@ -346,6 +440,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	elements.shareLink = document.getElementById("share-link");
 	elements.copyTokenButton = document.getElementById("copy-token");
 	elements.shareLinkButton = document.getElementById("share-link-button");
+	elements.panelConnection = document.getElementById("panel-connection");
+	elements.panelToken = document.getElementById("panel-token");
+	elements.panelUsers = document.getElementById("panel-users");
 	elements.usernameInput = document.getElementById("username-input");
 	elements.exitChatButton = document.getElementById("exit-chat");
 	elements.form = document.getElementById("form");
@@ -355,6 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	elements.tokenUsed = document.getElementById("token-used");
 	elements.userCount = document.getElementById("user-count");
 	elements.connectionState = document.getElementById("connection-state");
+	elements.chatSubtitle = document.getElementById("chat-subtitle");
 	elements.toast = document.getElementById("toast");
 	elements.chatOverlay = document.getElementById("chat-overlay");
 
