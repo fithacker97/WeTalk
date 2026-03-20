@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, user-scalable=no" />
+
+		<title>App Chat</title>
+		<link rel="stylesheet" href="styles/styles.css" />
+		<script type="module" src="/js/client.js"></script>
+	</head>
+	<body>
+		<div id="dynamic-background"></div>
+		<section id="auth">
+			<form id="login-form">
+				<div id="sharing">
+					Share the token with your <br />
+					friends to join the same room
+				</div>
+				<div id="toast"></div>
+				<div id="token-display"></div>
+				<input type="text" id="token-input" placeholder="Enter your token" required />
+				<input type="text" id="username-input" placeholder="Enter your username" required />
+				<button id="generate-token">Generate Token</button>
+				<button type="submit">Join Chat</button>
+			</form>
+		</section>
+		<section id="chat" class="hidden">
+			<div id="chat-header">
+				<div id="token-used"></div>
+				<div id="user-count"></div>
+				<button id="exit-chat">Exit Chat</button>
+			</div>
+			<ul id="messages"></ul>
+			<form id="form">
+				<input
+					type="text"
+					name="message"
+					id="input"
+					placeholder="Type a message"
+					autocomplete="off"
+				/>
+				<button type="submit">Send</button>
+			</form>
+		</section>
+		<footer>
+			Developed by <a href="https://www.jatinbackends.tech/">Jatin</a>
+		</footer>
+	</body>
+</html>
