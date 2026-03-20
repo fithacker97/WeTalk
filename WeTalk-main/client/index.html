@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>WeTalk</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="styles/styles.css" />
+		<script type="module" src="/js/client.js"></script>
+	</head>
+	<body>
+		<div class="page-background" aria-hidden="true"></div>
+		<main class="app-shell">
+			<aside class="control-panel">
+				<div class="branding">
+					<h1>WeTalk</h1>
+					<p>Create or enter a token on this side, then chat on the right side.</p>
+				</div>
+				<form id="login-form">
+					<label for="token-input">Room Token</label>
+					<div class="token-controls">
+						<div id="token-display" tabindex="0" role="button">No token generated yet</div>
+						<button type="button" id="generate-token">Generate</button>
+					</div>
+					<input type="text" id="token-input" placeholder="Enter your token" required />
+					<div class="share-block">
+						<label for="share-link">Invite Link</label>
+						<input
+							type="text"
+							id="share-link"
+							readonly
+							placeholder="Generate or enter token to create link"
+						/>
+						<div class="share-actions">
+							<button type="button" id="copy-token" class="secondary-button">Copy Token</button>
+							<button type="button" id="share-link-button" class="secondary-button">
+								Share Link
+							</button>
+						</div>
+					</div>
+					<label for="username-input">Username</label>
+					<input type="text" id="username-input" placeholder="Enter your username" required />
+					<div class="control-actions">
+						<button type="submit">Join Chat</button>
+						<button type="button" id="exit-chat">Exit Chat</button>
+					</div>
+				</form>
+				<div id="toast"></div>
+				<p class="panel-note">Tip: click the generated token to copy it.</p>
+			</aside>
+
+			<section id="chat" class="chat-panel">
+				<div id="chat-header">
+					<div id="token-used">Token: -</div>
+					<div id="user-count">Users online: 0</div>
+					<div id="connection-state">Not connected</div>
+				</div>
+				<ul id="messages"></ul>
+				<div id="chat-overlay" class="chat-overlay">
+					Join a room from the left panel to start messaging.
+				</div>
+				<form id="form">
+					<input
+						type="text"
+						name="message"
+						id="input"
+						placeholder="Type a message"
+						autocomplete="off"
+						disabled
+					/>
+					<button type="submit" id="send-button" disabled>Send</button>
+				</form>
+			</section>
+		</main>
+		<footer>
+			Developed by <a href="https://www.jatinbackends.tech/">Jatin</a>
+		</footer>
+	</body>
+</html>
